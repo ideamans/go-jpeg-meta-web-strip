@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }} with Go ${{ matrix.go }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go: ["1.22", "1.23", "1.24"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Get dependencies
+        run: go mod download
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Test
+        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.go == '1.23'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.txt
+          flags: unittests
+          name: codecov-umbrella
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --timeout=5m
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Get dependencies
+        run: go mod download
+
+      - name: Run coverage
+        run: |
+          go test -coverprofile=coverage.out -covermode=atomic .
+          go tool cover -func=coverage.out
+
+      - name: Check coverage threshold
+        run: |
+          COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+          echo "Total coverage: $COVERAGE%"
+          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+            echo "Coverage is below 70%"
+            exit 1
+          fi

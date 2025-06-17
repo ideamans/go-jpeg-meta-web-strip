@@ -1,0 +1,82 @@
+linters:
+  enable:
+    - gofmt
+    - govet
+    - errcheck
+    - staticcheck
+    - ineffassign
+    - gosimple
+    - unused
+    - misspell
+    - gocyclo
+    - dupl
+    - goimports
+    - revive
+    - gosec
+    - unconvert
+    - goconst
+    - gocognit
+    - asciicheck
+    - gofumpt
+    - prealloc
+    - predeclared
+    - nilerr
+    - exhaustive
+    - exportloopref
+    - whitespace
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  misspell:
+    locale: US
+  gofumpt:
+    extra-rules: true
+  revive:
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
+      - name: empty-block
+      - name: superfluous-else
+      - name: unreachable-code
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - dupl
+        - gosec
+        - gocognit
+    - path: datacreator/
+      linters:
+        - dupl
+        - gocognit
+
+run:
+  skip-dirs:
+    - testdata
+    - vendor
+
+  timeout: 5m
