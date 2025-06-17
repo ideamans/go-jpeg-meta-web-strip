@@ -22,7 +22,7 @@ linters:
     - predeclared
     - nilerr
     - exhaustive
-    - exportloopref
+    - copyloopvar
     - whitespace
 
 linters-settings:
@@ -75,8 +75,9 @@ issues:
         - gocognit
 
 run:
-  skip-dirs:
+  timeout: 5m
+
+issues:
+  exclude-dirs:
     - testdata
     - vendor
-
-  timeout: 5m
